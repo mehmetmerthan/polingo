@@ -1,0 +1,27 @@
+{
+  "staging": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-polingo-staging-21c87-authRole",
+      "UnauthRoleArn": "arn:aws:iam::607219595660:role/amplify-polingo-staging-21c87-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::607219595660:role/amplify-polingo-staging-21c87-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-polingo-staging-21c87-deployment",
+      "UnauthRoleName": "amplify-polingo-staging-21c87-unauthRole",
+      "StackName": "amplify-polingo-staging-21c87",
+      "StackId": "arn:aws:cloudformation:us-east-1:607219595660:stack/amplify-polingo-staging-21c87/35210850-7cca-11ef-9f08-124e0717e8af",
+      "AmplifyAppId": "d186exdukxfd1d",
+      "AuthTriggerTemplateURL": "https://s3.amazonaws.com/amplify-polingo-staging-21c87-deployment/amplify-cfn-templates/auth/auth-trigger-cloudformation-template.json"
+    },
+    "categories": {
+      "auth": {
+        "polingoaed73920": {}
+      },
+      "function": {
+        "polingoaed73920PostConfirmation": {
+          "deploymentBucketName": "amplify-polingo-staging-21c87-deployment",
+          "s3Key": "amplify-builds/polingoaed73920PostConfirmation-597934776b71446c6138-build.zip"
+        }
+      }
+    }
+  }
+}

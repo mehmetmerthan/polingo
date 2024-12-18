@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "serviceConfiguration": {
+    "apiName": "polingo",
+    "serviceName": "AppSync",
+    "defaultAuthType": {
+      "mode": "API_KEY",
+      "expirationTime": 365,
+      "apiKeyExpirationDate": "2025-10-13T14:06:17.964Z",
+      "keyDescription": "polingoGrapfAPIKey"
+    },
+    "conflictResolution": {},
+    "additionalAuthTypes": []
+  }
+}

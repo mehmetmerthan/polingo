@@ -5,6 +5,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   Text,
+  RefreshControl,
 } from "react-native";
 import { SearchBar } from "@rneui/themed";
 import WordListRender from "../components/WordListRender";
@@ -27,6 +28,7 @@ export default function Dictionary() {
     { label: "Learning", value: "learning" },
     { label: "Learned", value: "learned" },
   ]);
+  const [refreshing, setRefreshing] = useState(false);
   const [isAddFormVisible, setIsAddFormVisible] = useState(false);
   const updateSearch = (search) => {
     setSearch(search);
@@ -85,6 +87,12 @@ export default function Dictionary() {
   useEffect(() => {
     fetchWordsData();
   }, [value]);
+  const onRefresh = async () => {
+    if (refreshing || loading) return;
+    setRefreshing(true);
+    await fetchWordsData();
+    setRefreshing(false);
+  };
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -135,6 +143,9 @@ export default function Dictionary() {
         onEndReached={loadMoreWords}
         onEndReachedThreshold={0.1}
         ListEmptyComponent={listEmptyComponent}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       />
       {isAddFormVisible ? (
         <AddWordForm

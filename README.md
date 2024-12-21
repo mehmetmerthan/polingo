@@ -24,13 +24,13 @@ This feature makes it easy for users to build their vocabulary while exploring t
 ## Screenshots
 
 1. **Personal Dictionary**  
-   ![Personal Dictionary Screenshot](link-to-your-image)
+   ![Personal Dictionary Screenshot](/assets/dictionary.jpg)
 
 2. **Web Sources - Curated Websites**  
-   ![Web Sources Screenshot](link-to-your-image)
+   ![Web Sources Screenshot](/assets/web.jpg)
 
-3. **Web Sources - Word Details**  
-   ![Web Sources Word Detail Screenshot](link-to-your-image)
+3. **Details - Word Details**  
+   ![Word Detail Screenshot](/assets/info.jpg)
 
 ## Relationship with Other Platforms
 

@@ -99,9 +99,10 @@ export default function Dictionary() {
         <SearchBar
           placeholder="Search"
           inputStyle={styles.text}
-          containerStyle={styles.searchBarContainer}
           onChangeText={updateSearch}
           value={search}
+          lightTheme
+          platform="android"
         />
         <View
           style={{
@@ -122,9 +123,7 @@ export default function Dictionary() {
             setValue={setValue}
             setItems={setItems}
             containerStyle={styles.dropDownContainerStyle}
-            style={styles.dropDownStyle}
-            dropDownContainerStyle={styles.dropDownStyle}
-            theme="DARK"
+            style={{ borderWidth: 0.2 }}
           />
         </View>
       </View>
@@ -139,7 +138,6 @@ export default function Dictionary() {
             loading={loading}
           />
         )}
-        style={styles.listItemContainer}
         onEndReached={loadMoreWords}
         onEndReachedThreshold={0.1}
         ListEmptyComponent={listEmptyComponent}
@@ -159,7 +157,7 @@ export default function Dictionary() {
           position="right"
           onPressMain={() => setIsAddFormVisible(true)}
           floatingIcon={<Text style={styles.floatingButtonText}>+</Text>}
-          color="#4CAF50"
+          color="#646cff"
           buttonSize={70}
         />
       )}
@@ -176,35 +174,23 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     zIndex: 999,
   },
-  searchBarContainer: {
-    borderRadius: 8,
-  },
-  listItemContainer: {
-    borderColor: "rgb(39, 39, 41)",
-    borderWidth: 1,
-    padding: 18,
-    borderRadius: 8,
-    backgroundColor: "#393e42",
-  },
-  dropDownStyle: {
-    backgroundColor: "#393e42",
-  },
+  searchBarContainer: {},
   dropDownContainerStyle: {
     width: 120,
     height: 40,
     marginRight: 10,
     marginBottom: 10,
+    borderColor: "#646cff",
   },
   text: {
     color: "rgb(229, 229, 231)",
   },
   textCount: {
-    color: "rgb(229, 229, 231)",
-    fontSize: 20,
-    fontWeight: "bold",
+    color: "rgb(39, 39, 41)",
+    fontSize: 17,
     textAlign: "center",
-    borderColor: "rgb(39, 39, 41)",
-    backgroundColor: "#393e42",
+    borderColor: "rgb(200, 200, 200)",
+    backgroundColor: "#ffffff",
     borderWidth: 1,
     borderRadius: 8,
     padding: 10,

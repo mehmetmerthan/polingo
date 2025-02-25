@@ -7,18 +7,18 @@ import {
 } from "@aws-amplify/ui-react-native";
 import { Amplify } from "aws-amplify";
 import config from "../amplifyconfiguration.json";
-import DrawerNav from "./DrawerNav";
+import BottomTab from "./BottomTab";
 Amplify.configure(config);
 const theme = {
   overrides: [defaultDarkModeOverride],
 };
 export default function RootRouter() {
   return (
-    <ThemeProvider theme={theme} colorMode={"dark"}>
+    <ThemeProvider theme={theme}>
       <Authenticator.Provider>
         <Authenticator>
-          <NavigationContainer theme={DarkTheme}>
-            <DrawerNav />
+          <NavigationContainer>
+            <BottomTab />
           </NavigationContainer>
         </Authenticator>
       </Authenticator.Provider>

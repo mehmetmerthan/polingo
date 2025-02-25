@@ -77,12 +77,12 @@ export const AddWordForm = ({
   const rightIcon = (
     <Button
       onPress={handleTranslate}
-      icon={{ name: "translate", color: "white" }}
+      icon={{ name: "translate", color: "#646cff" }}
       color={"transparent"}
       loading={loadingTranslate}
       size="md"
       loadingStyle={{
-        backgroundColor: "white",
+        backgroundColor: "#646cff",
         borderRadius: 50,
         width: 25,
         height: 25,
@@ -96,7 +96,7 @@ export const AddWordForm = ({
         style={styles.closeButton}
         onPress={() => setIsAddFormVisible(false)}
       >
-        <AntDesign name="closecircle" size={28} color="white" />
+        <AntDesign name="closecircle" size={28} color="#646cff" />
       </TouchableOpacity>
       <Input
         style={styles.input}
@@ -121,8 +121,7 @@ export const AddWordForm = ({
         title={"Add Word"}
         onPress={handleAddWord}
         containerStyle={styles.addButton}
-        titleStyle={{ color: "white" }}
-        color={"#4CAF50"}
+        titleStyle={{ color: "gray" }}
         loading={loadingButton}
         rightIcon={rightIcon}
       />
@@ -133,10 +132,7 @@ export const AddWordForm = ({
 const styles = StyleSheet.create({
   inputContainer: {
     marginTop: 20,
-    padding: 10,
-    backgroundColor: "#393e42",
-    borderRadius: 8,
-    elevation: 5,
+    padding: 5,
   },
   input: {
     borderColor: "#ccc",
@@ -144,7 +140,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 10,
     paddingLeft: 10,
-    backgroundColor: "#393e42",
+    //backgroundColor: "#393e42",
     color: "rgb(229, 229, 231)",
   },
   errorMessage: {
@@ -157,13 +153,14 @@ const styles = StyleSheet.create({
     right: 0,
     borderRadius: 50,
     padding: 5,
-    backgroundColor: "black",
+    //backgroundColor: "black",
   },
   addButton: {
     borderRadius: 8,
     marginTop: 10,
     borderColor: "#646cff",
     borderWidth: 1,
-    backgroundColor: "#000000",
+    alignSelf:"center"
+    //backgroundColor: "#000000",
   },
 });

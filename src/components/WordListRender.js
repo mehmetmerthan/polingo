@@ -74,8 +74,8 @@ export default function WordListRender({
             <Icon
               name="play-circle"
               type="font-awesome"
-              color={"white"}
-              size={32}
+              size={28}
+              color={"#646cff"}
             />
           }
           onPress={() => playSound(item.word)}
@@ -87,8 +87,8 @@ export default function WordListRender({
             <Icon
               name="info-circle"
               type="font-awesome"
-              color={"white"}
-              size={32}
+              size={28}
+              color={"#646cff"}
             />
           }
           onPress={openInfo}
@@ -99,8 +99,8 @@ export default function WordListRender({
             <Icon
               name="youtube-play"
               type="font-awesome"
-              color={"white"}
-              size={32}
+              color={"#646cff"}
+              size={28}
             />
           }
           onPress={openGlish}
@@ -111,8 +111,8 @@ export default function WordListRender({
             <Icon
               name="delete"
               type="material-comunity-icons"
-              color={"white"}
-              size={32}
+              color={"#646cff"}
+              size={28}
             />
           }
           onPress={handleDelete}
@@ -144,17 +144,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "white",
+    borderColor: "#ddd", 
     borderRadius: 8,
     padding: 8,
     marginVertical: 8,
-    backgroundColor: "rgb(1, 1, 1)",
+    backgroundColor: "#ffffff",
   },
   listButtonGroup: {
     flexDirection: "row",
-    backgroundColor: "#393e42",
+    backgroundColor: "#f5f5f5",
     borderRadius: 8,
-    borderColor: "rgb(39, 39, 41)",
+    borderColor: "#ddd", 
     borderWidth: 1,
     marginTop: 8,
     alignSelf: "center",
@@ -166,11 +166,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   word: {
-    color: "rgb(229, 229, 231)",
+    color: "rgb(39, 39, 41)",
     fontSize: 28,
   },
   meaning: {
-    color: "rgb(229, 229, 231)",
+    color: "rgb(39, 39, 41)",
     fontSize: 22,
     fontWeight: "300",
   },

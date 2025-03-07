@@ -10,13 +10,11 @@ import {
 import { SearchBar } from "@rneui/themed";
 import WordListRender from "../components/WordListRender";
 import DropDownPicker from "react-native-dropdown-picker";
-import { fetchWords } from "../services/wordService";
-import { FloatingAction } from "react-native-floating-action";
-import { AddWordForm } from "../components/AddWordForm";
+import * as FileSystem from "expo-file-system";
 export default function Dictionary() {
   const pageSize = 20;
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState("learning");
+  const [value, setValue] = useState("learn");
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [wordList, setWordList] = useState([]);
@@ -25,11 +23,19 @@ export default function Dictionary() {
   const [wordCount, setWordCount] = useState(0);
   const [search, setSearch] = useState("");
   const [items, setItems] = useState([
-    { label: "Learning", value: "learning" },
-    { label: "Learned", value: "learned" },
+    { label: "Learning", value: "learn" },
+    { label: "Learned", value: "known" },
   ]);
+  const [openCefr, setOpenCefr] = useState(false);
+  const [valueCefr, setValueCefr] = useState("a1");
   const [refreshing, setRefreshing] = useState(false);
-  const [isAddFormVisible, setIsAddFormVisible] = useState(false);
+  const [cefr, setCefr] = useState([
+    { label: "A1 Level", value: "a1" },
+    { label: "A2 Level", value: "a2" },
+    { label: "B1 Level", value: "b1" },
+    { label: "B2 Level", value: "b2" },
+    { label: "C1 Level", value: "c1" },
+  ]);
   const updateSearch = (search) => {
     setSearch(search);
     if (search === "") {
@@ -38,12 +44,13 @@ export default function Dictionary() {
     }
     const filteredWords = allWords.filter((word) => {
       return (
-        word.word.toLowerCase().includes(search.toLowerCase()) ||
-        word.translation.toLowerCase().includes(search.toLowerCase())
+        word.term.toLowerCase().includes(search.toLowerCase()) ||
+        word.meaning.toLowerCase().includes(search.toLowerCase())
       );
     });
     setWords(filteredWords);
   };
+
   const listEmptyComponent = () => {
     return (
       <View>
@@ -51,28 +58,33 @@ export default function Dictionary() {
       </View>
     );
   };
+
   const fetchWordsData = async () => {
     setLoading(true);
-    if (value === "learning") {
-      const { learningWords, allWords } = await fetchWords();
-      setAllWords(allWords);
-      setWordList(learningWords);
-      const newWords = learningWords.slice(0, pageSize);
-      const newWordCount = learningWords.length;
-      setWordCount(newWordCount);
-      setWords(newWords);
-    } else if (value === "learned") {
-      const { learnedWords, allWords } = await fetchWords();
-      setAllWords(allWords);
-      setWordList(learnedWords);
-      console.log("learnedWords", learnedWords);
-      const newWords = learnedWords.slice(0, pageSize);
-      const newWordCount = learnedWords.length;
-      setWordCount(newWordCount);
-      setWords(newWords);
+    try {
+      const oxfordPath = `${FileSystem.documentDirectory}${valueCefr}${value}.json`;
+      const fileInfo = await FileSystem.getInfoAsync(oxfordPath);
+      if (!fileInfo.exists) {
+        setAllWords([]);
+        setWordList([]);
+        setWords([]);
+        setWordCount(0);
+        setLoading(false);
+        return;
+      }
+      const data = await FileSystem.readAsStringAsync(oxfordPath);
+      const parsedData = JSON.parse(data);
+      setAllWords(parsedData);
+      const initialWords = parsedData.slice(0, pageSize);
+      setWordList(parsedData);
+      setWordCount(parsedData.length);
+      setWords(initialWords);
+    } catch (error) {
+      console.error("Error reading data from file:", error);
     }
     setLoading(false);
   };
+
   const loadMoreWords = () => {
     if (loading || search !== "") {
       return;
@@ -84,9 +96,11 @@ export default function Dictionary() {
     setPage(nextPage);
     setLoading(false);
   };
+
   useEffect(() => {
     fetchWordsData();
-  }, [value]);
+  }, [valueCefr, value]);
+
   const onRefresh = async () => {
     if (refreshing || loading) return;
     setRefreshing(true);
@@ -116,6 +130,16 @@ export default function Dictionary() {
           )}
           {loading && <ActivityIndicator size="large" color="#646cff" />}
           <DropDownPicker
+            open={openCefr}
+            value={valueCefr}
+            items={cefr}
+            setOpen={setOpenCefr}
+            setValue={setValueCefr}
+            setItems={setCefr}
+            containerStyle={styles.dropDownContainerStyle}
+            style={{ borderWidth: 0.2 }}
+          />
+          <DropDownPicker
             open={open}
             value={value}
             items={items}
@@ -129,13 +153,15 @@ export default function Dictionary() {
       </View>
       <FlatList
         data={words}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item.term}
         renderItem={({ item }) => (
           <WordListRender
             item={item}
             fetchData={fetchWordsData}
             setLoading={setLoading}
             loading={loading}
+            status={value}
+            level={valueCefr}
           />
         )}
         onEndReached={loadMoreWords}
@@ -145,22 +171,6 @@ export default function Dictionary() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       />
-      {isAddFormVisible ? (
-        <AddWordForm
-          setIsAddFormVisible={setIsAddFormVisible}
-          allWords={allWords}
-          setLoadingState={setLoading}
-          fetchData={fetchWordsData}
-        />
-      ) : (
-        <FloatingAction
-          position="right"
-          onPressMain={() => setIsAddFormVisible(true)}
-          floatingIcon={<Text style={styles.floatingButtonText}>+</Text>}
-          color="#646cff"
-          buttonSize={70}
-        />
-      )}
     </View>
   );
 }
@@ -201,7 +211,7 @@ const styles = StyleSheet.create({
     fontSize: 30,
   },
   listEmptyText: {
-    color: "rgb(229, 229, 231)",
+    color: "rgb(39, 39, 41)",
     fontSize: 20,
     textAlign: "center",
   },

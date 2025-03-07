@@ -5,7 +5,6 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Words from "../screens/Words";
 import Practice from "../screens/Practice";
-import Feather from "@expo/vector-icons/Feather";
 const Tab = createBottomTabNavigator();
 
 export default function BottomTab() {
@@ -30,15 +29,6 @@ export default function BottomTab() {
         options={{
           tabBarIcon: ({ color, size }) => (
             <AntDesign name="bars" color={color} size={size} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Practice"
-        component={Practice}
-        options={{
-          tabBarIcon: ({ color, size }) => (
-            <AntDesign name="message1" color={color} size={size} />
           ),
         }}
       />

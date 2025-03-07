@@ -1,37 +1,70 @@
 import { React, useState } from "react";
 import { CheckBox, Button, Icon } from "@rneui/themed";
 import { View, Text, StyleSheet } from "react-native";
-import { changeWord, removeWord } from "../services/wordService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Speech from "expo-speech";
 import GlishModal from "./GlishModal";
 import WordDetailModal from "./WordDetailModal";
+import * as FileSystem from "expo-file-system";
 export default function WordListRender({
   item,
   fetchData,
   setLoading,
   loading,
+  status,
+  level,
 }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalGlishVisible, setModalGlishVisible] = useState(false);
   const [langCodeThree, setLangCodeThree] = useState("");
   async function handleStatusChange() {
     setLoading(true);
-    const result = await changeWord({
-      wordId: item.id,
-      isLearned: !item.isLearned,
-    });
-    if (result) {
-      await fetchData();
+    const oxfordPath = `${FileSystem.documentDirectory}${level}${status}.json`;
+    const data = await FileSystem.readAsStringAsync(oxfordPath);
+    const words = JSON.parse(data);
+    const filteredWords = words.filter(
+      (word) => !word.term.includes(item.term)
+    );
+    await FileSystem.writeAsStringAsync(
+      oxfordPath,
+      JSON.stringify(filteredWords)
+    );
+    const handleWordsUpdate = async (filePath) => {
+      const fileInfo = await FileSystem.getInfoAsync(filePath);
+      let wordsArray = [];
+      if (fileInfo.exists) {
+        const data = await FileSystem.readAsStringAsync(filePath);
+        wordsArray = JSON.parse(data);
+      }
+      wordsArray.push(item);
+      await FileSystem.writeAsStringAsync(filePath, JSON.stringify(wordsArray));
+    };
+    if (status === "learn") {
+      await handleWordsUpdate(
+        `${FileSystem.documentDirectory}${level}known.json`
+      );
+    } else {
+      await handleWordsUpdate(
+        `${FileSystem.documentDirectory}${level}learn.json`
+      );
     }
+    await fetchData();
     setLoading(false);
   }
+
   const handleDelete = async () => {
     setLoading(true);
-    const result = await removeWord(item.id);
-    if (result) {
-      await fetchData();
-    }
+    const oxfordPath = `${FileSystem.documentDirectory}${level}${status}.json`;
+    const data = await FileSystem.readAsStringAsync(oxfordPath);
+    const words = JSON.parse(data);
+    const filteredWords = words.filter(
+      (word) => !word.term.includes(item.term)
+    );
+    await FileSystem.writeAsStringAsync(
+      oxfordPath,
+      JSON.stringify(filteredWords)
+    );
+    await fetchData();
     setLoading(false);
   };
   async function playSound(text) {
@@ -64,9 +97,9 @@ export default function WordListRender({
           onPress={handleStatusChange}
           disabled={loading}
         />
-        <Text style={styles.word}>{item.word}</Text>
+        <Text style={styles.term}>{item.term}</Text>
       </View>
-      <Text style={styles.meaning}>{item.translation}</Text>
+      <Text style={styles.meaning}>{item.meaning}</Text>
       <View style={styles.listButtonGroup}>
         <Button
           type="clear"
@@ -78,7 +111,7 @@ export default function WordListRender({
               color={"#646cff"}
             />
           }
-          onPress={() => playSound(item.word)}
+          onPress={() => playSound(item.term)}
           disabled={loading}
         />
         <Button
@@ -123,7 +156,7 @@ export default function WordListRender({
         <WordDetailModal
           visible={modalVisible}
           setVisible={setModalVisible}
-          word={item.word}
+          word={item.term}
           translateTo={langCodeThree}
         />
       )}
@@ -131,7 +164,7 @@ export default function WordListRender({
         <GlishModal
           visible={modalGlishVisible}
           setVisible={setModalGlishVisible}
-          word={item.word}
+          word={item.term}
         />
       )}
     </View>
@@ -144,7 +177,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "#ddd", 
+    borderColor: "#ddd",
     borderRadius: 8,
     padding: 8,
     marginVertical: 8,
@@ -154,7 +187,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     backgroundColor: "#f5f5f5",
     borderRadius: 8,
-    borderColor: "#ddd", 
+    borderColor: "#ddd",
     borderWidth: 1,
     marginTop: 8,
     alignSelf: "center",
@@ -165,7 +198,7 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
     justifyContent: "center",
   },
-  word: {
+  term: {
     color: "rgb(39, 39, 41)",
     fontSize: 28,
   },

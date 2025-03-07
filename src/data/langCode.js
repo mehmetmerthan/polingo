@@ -5,7 +5,18 @@ export const langCodeMapTwo = {
   french: "fr",
   german: "de",
   italian: "it",
+  chinese: "zh-CN",
+  hindi: "hi",
+  portuguese: "pt",
+  indonesian: "id",
+  japanese: "ja",
+  bengali: "bn",
+  russian: "ru",
+  arabic: "ar",
+  korean: "ko",
+  vietnamese: "vi",
 };
+
 export const langCodeMapThree = {
   turkish: "tur",
   english: "eng",
@@ -13,4 +24,14 @@ export const langCodeMapThree = {
   french: "fre",
   german: "ger",
   italian: "ita",
+  chinese: "chi",
+  hindi: "hin",
+  portuguese: "por",
+  indonesian: "ind",
+  japanese: "jpn",
+  bengali: "ben",
+  russian: "rus",
+  arabic: "ara",
+  korean: "kor",
+  vietnamese: "vie",
 };

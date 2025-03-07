@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,34 +6,97 @@ import {
   Animated,
   PanResponder,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-const wordsList = [
-  { word: "Apple", meaning: "A round fruit with red or green skin." },
-  { word: "Table", meaning: "A piece of furniture with a flat top and legs." },
-  { word: "Run", meaning: "To move quickly on foot." },
-  { word: "Book", meaning: "A set of written pages bound together." },
-  { word: "Chair", meaning: "A seat with a back, typically for one person." },
-];
+import * as FileSystem from "expo-file-system";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 const levels = ["A1 Level", "A2 Level", "B1 Level", "B2 Level", "C1 Level"];
-
+const levelsCode = ["a1", "a2", "b1", "b2", "c1"];
 const Words = () => {
-  const [wordIndex, setWordIndex] = useState(0);
   const [levelIndex, setLevelIndex] = useState(0);
+  const [allWords, setAllWords] = useState([]);
+  const [currentWord, setCurrentWord] = useState(null);
+  const [wordCount, setWordCount] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [lang, setLang] = useState("");
   const position = useRef(new Animated.ValueXY()).current;
-
-  const handleNextWord = () => {
-    setWordIndex((prevIndex) => (prevIndex + 1) % wordsList.length);
+  useEffect(() => {
+    const loadOxfordData = async () => {
+      setLoading(true);
+      try {
+        const res = await AsyncStorage.getItem("langCodeTwo");
+        if (!res) {
+          alert("Please select a language from settings");
+          setLoading(false);
+          return;
+        }
+        setLang(res);
+        const oxfordPath = `${FileSystem.documentDirectory}${levelsCode[levelIndex]}unsigned.json`;
+        const fileInfo = await FileSystem.getInfoAsync(oxfordPath);
+        if (!fileInfo.exists) {
+          const response = await fetch(
+            `https://raw.githubusercontent.com/mehmetmerthan/polingo-words/main/word-list/${lang}/${lang}-${levelsCode[levelIndex]}.json`
+          );
+          const data = await response.json();
+          await FileSystem.writeAsStringAsync(oxfordPath, JSON.stringify(data));
+        }
+        const data = await FileSystem.readAsStringAsync(oxfordPath);
+        if (data) {
+          const words = JSON.parse(data);
+          setAllWords(words);
+        }
+      } catch (error) {
+        console.error("Error fetching words", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadOxfordData();
+  }, [levelIndex]);
+  const handleDelete = async () => {
+    await updateOxfordDataTodelete();
     position.setValue({ x: 0, y: 0 });
   };
+  const handleLearn = async () => {
+    await updateOxfordDataToLearn();
+    await updateOxfordDataTodelete();
+    position.setValue({ x: 0, y: 0 });
+  };
+  const updateOxfordDataToLearn = async () => {
+    const oxfordPath = `${FileSystem.documentDirectory}${levelsCode[levelIndex]}learn.json`;
+    try {
+      const fileExists = await FileSystem.getInfoAsync(oxfordPath);
+      let wordsArray = [];
+      if (fileExists.exists) {
+        const fileContent = await FileSystem.readAsStringAsync(oxfordPath);
+        wordsArray = JSON.parse(fileContent);
+      }
+      wordsArray.push(currentWord);
+      await FileSystem.writeAsStringAsync(
+        oxfordPath,
+        JSON.stringify(wordsArray)
+      );
+    } catch (error) {
+      console.error("Error updating learn.json:", error);
+    }
+  };
 
-  const handlePrevWord = () => {
-    setWordIndex(
-      (prevIndex) => (prevIndex - 1 + wordsList.length) % wordsList.length
+  const updateOxfordDataTodelete = async () => {
+    const updatedWords = allWords.slice(1);
+    const oxfordPath = `${FileSystem.documentDirectory}${levelsCode[levelIndex]}unsigned.json`;
+    await FileSystem.writeAsStringAsync(
+      oxfordPath,
+      JSON.stringify(updatedWords)
     );
-    position.setValue({ x: 0, y: 0 });
+    setAllWords(updatedWords);
   };
-
+  useEffect(() => {
+    if (allWords.length > 0) {
+      setCurrentWord(allWords[0]);
+      setWordCount(allWords.length);
+    }
+  }, [allWords]);
   const handleLevelIncrease = () => {
     setLevelIndex((prevIndex) => Math.min(prevIndex + 1, levels.length - 1));
   };
@@ -50,13 +113,23 @@ const Words = () => {
       },
       onPanResponderRelease: (_, gesture) => {
         if (Math.abs(gesture.dx) > 80) {
-          Animated.timing(position, {
-            toValue: { x: gesture.dx > 0 ? 500 : -500, y: 0 },
-            duration: 100,
-            useNativeDriver: false,
-          }).start(() => {
-            handleNextWord();
-          });
+          if (gesture.dx > 0) {
+            Animated.timing(position, {
+              toValue: { x: 500, y: 0 },
+              duration: 100,
+              useNativeDriver: false,
+            }).start(() => {
+              handleDelete();
+            });
+          } else {
+            Animated.timing(position, {
+              toValue: { x: -500, y: 0 },
+              duration: 100,
+              useNativeDriver: false,
+            }).start(() => {
+              handleLearn();
+            });
+          }
         } else {
           Animated.spring(position, {
             toValue: { x: 0, y: 0 },
@@ -90,35 +163,41 @@ const Words = () => {
         </TouchableOpacity>
         <View style={styles.levelContainer}>
           <Text style={styles.levelText}>{levels[levelIndex]}</Text>
-          <Text style={styles.levelSubText}>1054 left</Text>
+          <Text style={styles.levelSubText}>{wordCount} left</Text>
         </View>
         <TouchableOpacity onPress={handleLevelIncrease}>
           <Ionicons name="chevron-forward" size={28} color="#333" />
         </TouchableOpacity>
       </View>
-      <View style={styles.cardContainer}>
-        <Animated.View
-          style={[styles.card, animatedCardStyle]}
-          {...panResponder.panHandlers}
-        >
-          <Text style={styles.wordText}>{wordsList[wordIndex].word}</Text>
-          <Text style={styles.meaningText}>{wordsList[wordIndex].meaning}</Text>
-        </Animated.View>
-      </View>
-      <View style={styles.buttonsContainer}>
-        <TouchableOpacity onPress={handleNextWord} style={styles.button}>
-          <Ionicons name="close" size={24} color="white" />
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={handlePrevWord}
-          style={[styles.button, { backgroundColor: "gray" }]}
-        >
-          <Ionicons name="refresh" size={24} color="white" />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={handleNextWord} style={styles.button}>
-          <Ionicons name="checkmark" size={24} color="white" />
-        </TouchableOpacity>
-      </View>
+      {loading ? (
+        <ActivityIndicator
+          color={"#646cff"}
+          size={"large"}
+          style={styles.activityIndicator}
+        />
+      ) : currentWord ? (
+        <>
+          <View style={styles.cardContainer}>
+            <Animated.View
+              style={[styles.card, animatedCardStyle]}
+              {...panResponder.panHandlers}
+            >
+              <Text style={styles.wordText}>{currentWord?.term}</Text>
+              <Text style={styles.meaningText}>{currentWord?.meaning}</Text>
+            </Animated.View>
+          </View>
+          <View style={styles.buttonsContainer}>
+            <TouchableOpacity onPress={handleLearn} style={styles.button}>
+              <Ionicons name="close" size={24} color="white" />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleDelete} style={styles.button}>
+              <Ionicons name="checkmark" size={24} color="white" />
+            </TouchableOpacity>
+          </View>
+        </>
+      ) : (
+        <Text style={styles.noticeText}>There is no word to learn</Text>
+      )}
     </View>
   );
 };
@@ -207,5 +286,15 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 3,
     elevation: 5,
+  },
+  activityIndicator: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  noticeText: {
+    fontSize: 20,
+    color: "#333",
+    fontWeight: "300",
   },
 });

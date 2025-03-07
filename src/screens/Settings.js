@@ -6,13 +6,11 @@ import { signOut } from "aws-amplify/auth";
 import { languages } from "../data/languages";
 import DropDownPicker from "react-native-dropdown-picker";
 import { langCodeMapTwo, langCodeMapThree } from "../data/langCode";
+import * as FileSystem from "expo-file-system";
 export default function Settings() {
   const [loadingStorage, setLoadingStorage] = useState(false);
-  //const [loadingTrainingStorage, setLoadingTrainingStorage] = useState(false);
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState();
-  // const [openTraining, setOpenTraining] = useState(false);
-  // const [valueTraining, setValueTraining] = useState();
   const [items, setItems] = useState(languages);
   useEffect(() => {
     const loadStorage = async () => {
@@ -21,10 +19,6 @@ export default function Settings() {
         if (res) {
           setValue(res);
         }
-        // const resTraining = await AsyncStorage.getItem("langTraining");
-        // if (resTraining) {
-        //   setValueTraining(resTraining);
-        // }
       } catch (e) {
         console.error(e);
       }
@@ -50,31 +44,24 @@ export default function Settings() {
       console.log(e);
     }
   };
-  // const saveTrainingLang = async () => {
-  //   try {
-  //     if (!valueTraining) {
-  //       alert("Please select a training language");
-  //       return;
-  //     }
-  //     setLoadingTrainingStorage(true);
-  //     await AsyncStorage.setItem("langTraining", valueTraining);
-  //     const langCodeTwo = langCodeMapTwo[valueTraining];
-  //     const langCodeThree = langCodeMapThree[valueTraining];
-  //     await AsyncStorage.setItem("langCodeTwoTraining", langCodeTwo);
-  //     await AsyncStorage.setItem("langCodeThreeTraining", langCodeThree);
-  //     setLoadingTrainingStorage(false);
-  //     alert("Training language updated successfully");
-  //   } catch (e) {
-  //     console.log(e);
-  //   }
-  // };
   const clearCache = async () => {
     try {
-      await AsyncStorage.removeItem("lang");
-      await AsyncStorage.removeItem("langCodeTwo");
-      await AsyncStorage.removeItem("langCodeThree");
+      // await AsyncStorage.removeItem("lang");
+      // await AsyncStorage.removeItem("langCodeTwo");
+      // await AsyncStorage.removeItem("langCodeThree");
+      await FileSystem.deleteAsync(
+        `${FileSystem.documentDirectory}a1unsigned.json`
+      );
+      console.log("Cache cleared");
     } catch (e) {
       console.log(e);
+    }
+  };
+  const showUserProp = async () => {
+    try {
+      const res = await AsyncStorage.getItem("lang");
+    } catch (error) {
+      console.log(error);
     }
   };
   return (
@@ -90,9 +77,7 @@ export default function Settings() {
             setValue={setValue}
             setItems={setItems}
             containerStyle={styles.dropDownContainerStyle}
-            style={styles.dropDownStyle}
             dropDownContainerStyle={styles.dropDownStyle}
-            theme="DARK"
             searchable={true}
             searchPlaceholder="Search"
             translation={{ NOTHING_TO_SHOW: "No item" }}
@@ -107,36 +92,8 @@ export default function Settings() {
             titleStyle={styles.text}
           />
         </View>
-        {/* <View style={{ marginTop: 40 }}>
-          <Text style={styles.title}>Select your training language</Text>
-          <DropDownPicker
-            open={openTraining}
-            value={valueTraining}
-            items={items}
-            setOpen={setOpenTraining}
-            setValue={setValueTraining}
-            setItems={setItems}
-            containerStyle={styles.dropDownContainerStyle}
-            style={styles.dropDownStyle}
-            dropDownContainerStyle={styles.dropDownStyle}
-            theme="DARK"
-            searchable={true}
-            searchPlaceholder="Search"
-            translation={{ NOTHING_TO_SHOW: "No item" }}
-          />
-          <Button
-            type="clear"
-            onPress={saveTrainingLang}
-            disabled={loadingTrainingStorage}
-            loading={loadingTrainingStorage}
-            title={"Save"}
-            containerStyle={styles.button}
-            titleStyle={styles.text}
-          />
-        </View> */}
       </View>
-
-      {/* <Button title={"x"} onPress={clearCache}/> */}
+      <Button title={"x"} onPress={clearCache} />
       <Button
         type="clear"
         title={"Sign Out"}
@@ -152,28 +109,29 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 24,
     justifyContent: "center",
+    backgroundColor: "#f5f5f5",
   },
   button: {
-    backgroundColor: "#000000",
-    color: "rgb(229, 229, 231)",
+    backgroundColor: "#646cff",
     borderRadius: 8,
     padding: 5,
-    borderColor: "#646cff",
-    borderWidth: 1,
     alignSelf: "flex-end",
   },
   card: {
-    flex: 1,
-    padding: 24,
-    backgroundColor: "rgb(18, 18, 18)",
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "rgb(39, 39, 41)",
-    flexDirection: "column",
+    height: "90%",
+    backgroundColor: "#fff",
+    borderRadius: 20,
+    padding: 20,
     alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 8,
   },
   title: {
-    color: "rgb(229, 229, 231)",
+    color: "#333",
     fontSize: 20,
     fontWeight: "bold",
     alignSelf: "flex-start",
@@ -189,12 +147,8 @@ const styles = StyleSheet.create({
     color: "rgb(229, 229, 231)",
     borderRadius: 8,
     padding: 5,
-    borderWidth: 1,
     marginTop: 10,
     alignSelf: "center",
-  },
-  dropDownStyle: {
-    backgroundColor: "#393e42",
   },
   dropDownContainerStyle: {
     marginVertical: 20,
